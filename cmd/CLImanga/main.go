@@ -65,7 +65,7 @@ func selectManga(mangaName *string) (string, error) {
 func selectChapterFromManga(mangaID *string) {
 	fmt.Println("Select a Chapter from the list..." + *mangaID)
 
-	var chapterList map[string]string
+	var chapterList map[string]map[string]any
 	var err error
 
 	chapterList, err = manga.GetAllChapterListOfManga(mangaID)
