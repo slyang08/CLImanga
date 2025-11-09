@@ -40,6 +40,7 @@ func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 
 	params := url.Values{}
 	params.Add("title", *mangaName)
+	params.Add("order[relevance]", "desc")
 
 	fullAPIURL := getFullBuiltURL(&apiURl, &params)
 
@@ -84,6 +85,7 @@ func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // https://api.mangadex.org/docs/04-chapter/search/
 	APIURL := baseURL + "/manga/" + *mangaID + "/feed"
 	params := url.Values{}
+	params.Add("offset", "0")
 	params.Add("translatedLanguage[]", "en")
 	params.Add("order[chapter]", "asc")
 	fullAPIURL := getFullBuiltURL(&APIURL, &params)

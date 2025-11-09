@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/manifoldco/promptui"
 	"github.com/scinac/CLImanga/internal/manga"
 )
 
@@ -47,19 +48,28 @@ func selectManga(mangaName *string) (string, error) {
 		return "", fmt.Errorf("Sorry no mangas found with that name")
 	}
 
-	fmt.Println("Mangas found: ")
-
-	var counter uint8 = 1
-
-	for _, manga := range mangasFound {
-		fmt.Printf("%v. %s \n", counter, manga.Name)
-		return manga.ID, nil
-		counter++
+	prompt := promptui.Select{
+		Label: "Select a Manga",
+		Items: mangasFound,
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "▶ {{ .Name | cyan }}",
+			Inactive: "  {{ .Name }}",
+			Selected: "✔ {{ .Name | green }}",
+		},
+		Size: 10,
 	}
-	return "", nil
+
+	i, _, err := prompt.Run()
+	if err != nil {
+		return "", fmt.Errorf("selection cancelled or failed: %w", err)
+	}
+
+	selectedManga := mangasFound[i]
+	return selectedManga.ID, nil
 }
 
-func selectChapterFromManga(mangaID *string) {
+func selectChapterFromManga(mangaID *string) (*manga.ChapterSelect, error) {
 	fmt.Println("Select a Chapter from the list...")
 
 	chapterList, err := manga.GetAllChapterListOfManga(mangaID)
@@ -67,9 +77,25 @@ func selectChapterFromManga(mangaID *string) {
 		fmt.Println(err.Error())
 	}
 
-	for _, chapterInfo := range chapterList {
-		fmt.Printf("%v. %v \n", chapterInfo.ChapterNumber, chapterInfo.Title)
+	prompt := promptui.Select{
+		Label: "Select a Chapter",
+		Items: chapterList,
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "▶ Chapter {{ .ChapterNumber }}: {{ .Title | cyan }}",
+			Inactive: "  Chapter {{ .ChapterNumber }}: {{ .Title }}",
+			Selected: "✔ Chapter {{ .ChapterNumber }}: {{ .Title | green }}",
+		},
+		Size: 10,
 	}
+
+	i, _, err := prompt.Run()
+	if err != nil {
+		return nil, fmt.Errorf("chapter selection cancelled or failed: %w", err)
+	}
+
+	selectedChapter := chapterList[i]
+	return &selectedChapter, nil
 }
 
 func checkForDependencies() bool {
