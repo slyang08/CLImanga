@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/scinac/CLImanga/internal/manga"
 )
 
 func main() {
@@ -16,7 +18,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	if len(os.Args) == 0 {
+	if len(os.Args) < 2 {
 		fmt.Print("Search Manga: ")
 		mangaName, err := reader.ReadString('\n')
 		if err != nil {
@@ -29,6 +31,24 @@ func main() {
 
 func searchMangas(mangaName *string) {
 	fmt.Println("Searching mangas with Name:", *mangaName)
+
+	var mangasFound map[string]string
+	var err error
+
+	mangasFound, err = manga.FetchMangaNames(mangaName)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	if len(mangasFound) == 0 {
+		fmt.Println("Sorry no mangas found with that name")
+		return
+	}
+
+	fmt.Println("Mangas found: ")
+	for _, manga := range mangasFound {
+		fmt.Printf("%v \n", manga)
+	}
 }
 
 func checkForDependencies() bool {
