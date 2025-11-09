@@ -82,6 +82,7 @@ func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 }
 
 func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // https://api.mangadex.org/docs/04-chapter/search/
+
 	APIURL := baseURL + "/manga/" + *mangaID + "/feed"
 	params := url.Values{}
 	params.Add("translatedLanguage[]", "en")
@@ -102,7 +103,6 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 
 	for _, item := range dataArr { // path: data(id)(attributes)
 		itemMap, ok := item.(map[string]any)
-
 		if !ok {
 			continue
 		}
@@ -113,8 +113,14 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 			return nil, fmt.Errorf("couldnt get chapter list")
 		}
 
-		chapterID := itemMap["id"].(string)
-		title := attributes["title"].(string)
+		chapterID, _ := itemMap["id"].(string)
+
+		// Just handle empty title
+		title := "Untitled"
+		if t, ok := attributes["title"].(string); ok && t != "" {
+			title = t
+		}
+
 		pages := attributes["pages"].(float64)
 		chapterNumber := attributes["chapter"].(string)
 
