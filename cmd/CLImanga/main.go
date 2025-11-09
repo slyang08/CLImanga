@@ -38,10 +38,7 @@ func main() {
 func selectManga(mangaName *string) (string, error) {
 	fmt.Println("Searching mangas with Name:", *mangaName)
 
-	var mangasFound map[string]string
-	var err error
-
-	mangasFound, err = manga.FetchMangasByNameSearch(mangaName)
+	mangasFound, err := manga.FetchMangasByNameSearch(mangaName)
 	if err != nil {
 		return "", fmt.Errorf(err.Error())
 	}
@@ -54,26 +51,25 @@ func selectManga(mangaName *string) (string, error) {
 
 	var counter uint8 = 1
 
-	for id, mangaName := range mangasFound {
-		fmt.Printf("%v. %v \n", counter, mangaName)
-		return id, nil
+	for _, manga := range mangasFound {
+		fmt.Printf("%v. %s \n", counter, manga.Name)
+		return manga.ID, nil
 		counter++
 	}
 	return "", nil
 }
 
 func selectChapterFromManga(mangaID *string) {
-	fmt.Println("Select a Chapter from the list..." + *mangaID)
+	fmt.Println("Select a Chapter from the list...")
 
-	var chapterList map[string]map[string]any
-	var err error
-
-	chapterList, err = manga.GetAllChapterListOfManga(mangaID)
+	chapterList, err := manga.GetAllChapterListOfManga(mangaID)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	fmt.Println(chapterList)
+	for _, chapterInfo := range chapterList {
+		fmt.Printf("%v. %v \n", chapterInfo.ChapterNumber, chapterInfo.Title)
+	}
 }
 
 func checkForDependencies() bool {

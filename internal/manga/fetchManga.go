@@ -35,7 +35,7 @@ func makeGETApiRequest(fullAPIURL *string) (map[string]any, error) {
 	return result, nil
 }
 
-func FetchMangasByNameSearch(mangaName *string) (map[string]string, error) {
+func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 	apiURl := baseURL + "/manga"
 
 	params := url.Values{}
@@ -48,12 +48,12 @@ func FetchMangasByNameSearch(mangaName *string) (map[string]string, error) {
 		return nil, err
 	}
 
-	mangasFound := make(map[string]string)
+	mangasFound := []MangaSelect{}
 
 	dataArr, ok := data["data"].([]any) // json path: data(id)(attributes(title(en,..)))
 
 	if !ok {
-		return nil, fmt.Errorf("couldnt get data") // check if field exists
+		return nil, fmt.Errorf("couldnt get data")
 	}
 
 	for _, item := range dataArr {
@@ -71,15 +71,22 @@ func FetchMangasByNameSearch(mangaName *string) (map[string]string, error) {
 
 		if title, ok := attributes["title"].(map[string]any); ok {
 			if en, ok := title["en"].(string); ok {
-				mangasFound[mangaID] = en
+				mangasFound = append(mangasFound, MangaSelect{
+					ID:   mangaID,
+					Name: en,
+				})
 			}
 		}
 	}
 	return mangasFound, nil
 }
 
-func GetAllChapterListOfManga(mangaID *string) (map[string]map[string]any, error) { // https://api.mangadex.org/docs/04-chapter/search/
-	fullAPIURL := baseURL + "/manga/" + *mangaID + "/feed"
+func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // https://api.mangadex.org/docs/04-chapter/search/
+	APIURL := baseURL + "/manga/" + *mangaID + "/feed"
+	params := url.Values{}
+	params.Add("translatedLanguage[]", "en")
+	params.Add("order[chapter]", "asc")
+	fullAPIURL := getFullBuiltURL(&APIURL, &params)
 
 	data, err := makeGETApiRequest(&fullAPIURL)
 	if err != nil {
@@ -91,16 +98,14 @@ func GetAllChapterListOfManga(mangaID *string) (map[string]map[string]any, error
 		return nil, fmt.Errorf("couldnt get data")
 	}
 
-	chapterList := make(map[string]map[string]any) // path: data(id)(attributes)
+	chapterList := []ChapterSelect{}
 
-	for _, item := range dataArr {
+	for _, item := range dataArr { // path: data(id)(attributes)
 		itemMap, ok := item.(map[string]any)
 
 		if !ok {
 			continue
 		}
-
-		chapterID := itemMap["id"].(string)
 
 		attributes, ok := itemMap["attributes"].(map[string]any)
 
@@ -108,9 +113,18 @@ func GetAllChapterListOfManga(mangaID *string) (map[string]map[string]any, error
 			return nil, fmt.Errorf("couldnt get chapter list")
 		}
 
-		chapterList[chapterID] = attributes
+		chapterID := itemMap["id"].(string)
+		title := attributes["title"].(string)
+		pages := attributes["pages"].(float64)
+		chapterNumber := attributes["chapter"].(string)
+
+		chapterList = append(chapterList, ChapterSelect{
+			ID:            chapterID,
+			ChapterNumber: chapterNumber,
+			Title:         title,
+			Pages:         pages,
+		})
 
 	}
-
 	return chapterList, nil
 }
