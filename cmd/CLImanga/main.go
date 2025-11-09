@@ -25,30 +25,55 @@ func main() {
 			fmt.Print(err.Error())
 			return
 		}
-		searchMangas(&mangaName)
+
+		mangaID, err := selectManga(&mangaName)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		selectChapterFromManga(&mangaID)
 	}
 }
 
-func searchMangas(mangaName *string) {
+func selectManga(mangaName *string) (string, error) {
 	fmt.Println("Searching mangas with Name:", *mangaName)
 
 	var mangasFound map[string]string
 	var err error
 
-	mangasFound, err = manga.FetchMangaNames(mangaName)
+	mangasFound, err = manga.FetchMangasByNameSearch(mangaName)
 	if err != nil {
-		fmt.Print(err.Error())
+		return "", fmt.Errorf(err.Error())
 	}
 
 	if len(mangasFound) == 0 {
-		fmt.Println("Sorry no mangas found with that name")
-		return
+		return "", fmt.Errorf("Sorry no mangas found with that name")
 	}
 
 	fmt.Println("Mangas found: ")
-	for _, manga := range mangasFound {
-		fmt.Printf("%v \n", manga)
+
+	var counter uint8 = 1
+
+	for id, mangaName := range mangasFound {
+		fmt.Printf("%v. %v \n", counter, mangaName)
+		return id, nil
+		counter++
 	}
+	return "", nil
+}
+
+func selectChapterFromManga(mangaID *string) {
+	fmt.Println("Select a Chapter from the list..." + *mangaID)
+
+	var chapterList map[string]string
+	var err error
+
+	chapterList, err = manga.GetAllChapterListOfManga(mangaID)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Println(chapterList)
 }
 
 func checkForDependencies() bool {

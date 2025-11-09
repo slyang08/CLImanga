@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -35,7 +36,7 @@ func makeGETApiRequest(fullAPIURL *string) (map[string]interface{}, error) {
 	return result, nil
 }
 
-func FetchMangaNames(mangaName *string) (map[string]string, error) {
+func FetchMangasByNameSearch(mangaName *string) (map[string]string, error) {
 	apiURl := baseURL + "/manga"
 
 	params := url.Values{}
@@ -53,12 +54,12 @@ func FetchMangaNames(mangaName *string) (map[string]string, error) {
 	dataArr, ok := data["data"].([]interface{}) // json path: data(id)(attributes(title(en,..)))
 
 	if !ok {
-		return nil, fmt.Errorf("couldnt get data")
+		return nil, fmt.Errorf("couldnt get data") // check if field exists
 	}
 
 	for _, item := range dataArr {
 		itemMap, ok := item.(map[string]interface{})
-		if !ok { // check if field exists
+		if !ok {
 			continue
 		}
 
@@ -76,4 +77,36 @@ func FetchMangaNames(mangaName *string) (map[string]string, error) {
 		}
 	}
 	return mangasFound, nil
+}
+
+func GetAllChapterListOfManga(mangaID *string) (map[string]string, error) { // https://api.mangadex.org/docs/04-chapter/search/
+	fullAPIURL := baseURL + "/manga/" + *mangaID + "/feed"
+
+	data, err := makeGETApiRequest(&fullAPIURL)
+	if err != nil {
+		return nil, err
+	}
+
+	dataArr, ok := data["data"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("couldnt get data")
+	}
+
+	for _, item := range dataArr {
+		itemMap, ok := item.(map[string]interface{})
+
+		if !ok {
+			continue
+		}
+
+		attributes, ok := itemMap["attributes"].(map[string]interface{})
+
+		if !ok {
+			return nil, fmt.Errorf("Couldnt get chapter list")
+		}
+
+		log.Println(attributes)
+	}
+
+	return nil, nil
 }
