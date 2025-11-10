@@ -4,13 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 )
 
-var baseURL string = "https://api.mangadex.org"
+var (
+	baseURL     string = "https://api.mangadex.org"
+	downloadURL string = "https://uploads.mangadex.org"
+)
 
 func getFullBuiltURL(apiURL *string, params *url.Values) string {
 	return *apiURL + "?" + params.Encode()
@@ -85,7 +89,6 @@ func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 }
 
 func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // https://api.mangadex.org/docs/04-chapter/search/
-
 	APIURL := baseURL + "/manga/" + *mangaID + "/feed"
 	params := url.Values{}
 	params.Add("offset", "0")
@@ -140,7 +143,7 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 }
 
 func DownloadMangaChapter(chapterID *string) error {
-	chapterImageIDs, err := RetrieveMangaImagesIDs(chapterID)
+	chapterImageIDs, hash, err := retrieveMangaImagesIDs(chapterID)
 	if err != nil {
 		return err
 	}
@@ -150,18 +153,28 @@ func DownloadMangaChapter(chapterID *string) error {
 		return fmt.Errorf("failed to create directory: %v", err)
 	}
 
-	fmt.Println(chapterImageIDs)
+	for i, filename := range chapterImageIDs {
+		imageURL := fmt.Sprintf("%s/data-saver/%s/%s", downloadURL, hash, filename)
+		savePath := filepath.Join(dir, fmt.Sprintf("page_%03d%s", i+1, filepath.Ext(filename)))
+
+		if err := downloadFile(imageURL, savePath); err != nil {
+			log.Printf("Failed to download %s: %v", imageURL, err)
+			continue
+		}
+
+		log.Printf("Saved page %d: %s", i+1, savePath)
+	}
 
 	return nil
 }
 
-func RetrieveMangaImagesIDs(chapterID *string) ([]string, error) { // https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
+func retrieveMangaImagesIDs(chapterID *string) ([]string, string, error) { // https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
 	baseURL := "https://api.mangadex.org/at-home/server/" + *chapterID
 	// params := url.Values{}
 
 	data, err := makeGETApiRequest(&baseURL)
 	if err != nil {
-		return nil, fmt.Errorf("error when making API request %v", err)
+		return nil, "", fmt.Errorf("error when making API request %v", err)
 	}
 
 	// log.Print(data)
@@ -169,15 +182,37 @@ func RetrieveMangaImagesIDs(chapterID *string) ([]string, error) { // https://ap
 	// log.Print(dataArr)
 
 	if !ok {
-		return nil, fmt.Errorf("couldnt get data")
+		return nil, "", fmt.Errorf("couldnt get data")
 	}
 
 	var chapterImageIDs []string
+	var hash string = dataArr["hash"].(string)
 
 	if dataServerImages, ok := dataArr["dataSaver"].([]any); ok {
 		for _, chapterImageHashID := range dataServerImages {
 			chapterImageIDs = append(chapterImageIDs, chapterImageHashID.(string))
 		}
 	}
-	return chapterImageIDs, nil
+	return chapterImageIDs, hash, nil
+}
+
+func downloadFile(url, path string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	outFile, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+
+	_, err = io.Copy(outFile, resp.Body)
+	return err
 }

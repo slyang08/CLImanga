@@ -37,7 +37,7 @@ func main() {
 			fmt.Println(err)
 		}
 
-		manga.RetrieveMangaImagesIDs(&selectedChapter.ID)
+		manga.DownloadMangaChapter(&selectedChapter.ID)
 	}
 }
 
