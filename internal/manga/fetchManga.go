@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 )
 
 var baseURL string = "https://api.mangadex.org"
@@ -138,6 +139,22 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 	return chapterList, nil
 }
 
+func DownloadMangaChapter(chapterID *string) error {
+	chapterImageIDs, err := RetrieveMangaImagesIDs(chapterID)
+	if err != nil {
+		return err
+	}
+
+	dir := filepath.Join("resources", "downloads", "chapter-"+*chapterID)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create directory: %v", err)
+	}
+
+	fmt.Println(chapterImageIDs)
+
+	return nil
+}
+
 func RetrieveMangaImagesIDs(chapterID *string) ([]string, error) { // https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
 	baseURL := "https://api.mangadex.org/at-home/server/" + *chapterID
 	// params := url.Values{}
@@ -147,7 +164,9 @@ func RetrieveMangaImagesIDs(chapterID *string) ([]string, error) { // https://ap
 		return nil, fmt.Errorf("error when making API request %v", err)
 	}
 
-	dataArr, ok := data["data"].([]any) // json path: data(chapter(data[] (.png) or dataServer[] for lower quality(.jpg)))
+	// log.Print(data)
+	dataArr, ok := data["chapter"].(map[string]any) // json path: data(chapter(data[] (.png) or dataSaver[] for lower quality(.jpg)))
+	// log.Print(dataArr)
 
 	if !ok {
 		return nil, fmt.Errorf("couldnt get data")
@@ -155,21 +174,10 @@ func RetrieveMangaImagesIDs(chapterID *string) ([]string, error) { // https://ap
 
 	var chapterImageIDs []string
 
-	for _, item := range dataArr {
-		itemMap, ok := item.(map[string]any)
-		if !ok {
-			continue
+	if dataServerImages, ok := dataArr["dataSaver"].([]any); ok {
+		for _, chapterImageHashID := range dataServerImages {
+			chapterImageIDs = append(chapterImageIDs, chapterImageHashID.(string))
 		}
-
-		if chapter, ok := itemMap["chapter"].(map[string]any); ok {
-			if dataImages, ok := chapter["data"].([]any); ok {
-				for _, chapterImageID := range dataImages {
-					chapterImageIDs = append(chapterImageIDs, chapterImageID.(string))
-					log.Println(chapterImageID.(string))
-				}
-			}
-		}
-
 	}
 	return chapterImageIDs, nil
 }

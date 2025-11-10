@@ -32,7 +32,12 @@ func main() {
 			fmt.Println(err)
 		}
 
-		selectChapterFromManga(&mangaID)
+		selectedChapter, err := selectChapterFromManga(&mangaID)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		manga.RetrieveMangaImagesIDs(&selectedChapter.ID)
 	}
 }
 
