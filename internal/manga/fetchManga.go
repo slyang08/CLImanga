@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -135,4 +136,40 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 
 	}
 	return chapterList, nil
+}
+
+func RetrieveMangaImagesIDs(chapterID *string) ([]string, error) { // https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
+	baseURL := "https://api.mangadex.org/at-home/server/" + *chapterID
+	// params := url.Values{}
+
+	data, err := makeGETApiRequest(&baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("error when making API request %v", err)
+	}
+
+	dataArr, ok := data["data"].([]any) // json path: data(chapter(data[] (.png) or dataServer[] for lower quality(.jpg)))
+
+	if !ok {
+		return nil, fmt.Errorf("couldnt get data")
+	}
+
+	var chapterImageIDs []string
+
+	for _, item := range dataArr {
+		itemMap, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if chapter, ok := itemMap["chapter"].(map[string]any); ok {
+			if dataImages, ok := chapter["data"].([]any); ok {
+				for _, chapterImageID := range dataImages {
+					chapterImageIDs = append(chapterImageIDs, chapterImageID.(string))
+					log.Println(chapterImageID.(string))
+				}
+			}
+		}
+
+	}
+	return chapterImageIDs, nil
 }
