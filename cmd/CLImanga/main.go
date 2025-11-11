@@ -9,6 +9,13 @@ import (
 	"github.com/scinac/CLImanga/internal/manga"
 )
 
+const (
+	APPMODE_DOWNLOAD   = 0
+	APPMODE_READ       = 1
+	DIRECTORY_DOWNLOAD = "downloads"
+	DRECTORY_CACHE     = "cache"
+)
+
 func main() {
 	fmt.Println("Welcome to CLImanga!")
 	fmt.Println("Checking Dependecies... ")
@@ -20,6 +27,13 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	if len(os.Args) < 2 {
+		fmt.Println("Do you want to download a Manga or only read one?")
+		appMode, err := selectAppMode()
+		if err != nil {
+			fmt.Print(err.Error())
+			return
+		}
+
 		fmt.Print("Search Manga: ")
 		mangaName, err := reader.ReadString('\n')
 		if err != nil {
@@ -32,13 +46,43 @@ func main() {
 			fmt.Println(err)
 		}
 
-		selectedChapter, err := selectChapterFromManga(&mangaID)
-		if err != nil {
-			fmt.Println(err)
+		switch appMode {
+		case APPMODE_DOWNLOAD:
+		case APPMODE_READ:
+			readMangaMode(&mangaID, &mangaName)
 		}
-
-		manga.DownloadMangaChapter(&selectedChapter.ID, &mangaName, &selectedChapter.ChapterNumber)
 	}
+}
+
+func readMangaMode(mangaID *string, mangaName *string) {
+	selectedChapter, errSelect := selectChapterFromManga(mangaID)
+	if errSelect != nil {
+		fmt.Println(errSelect)
+	}
+
+	errDownload := manga.DownloadMangaChapter(&selectedChapter.ID, mangaName, &selectedChapter.ChapterNumber, DRECTORY_CACHE)
+	if errDownload != nil {
+		fmt.Print(errDownload.Error())
+	}
+}
+
+func selectAppMode() (int, error) {
+	prompt := promptui.Select{
+		Label: "Choose an action",
+		Items: []string{"Download Manga", "Read Manga"},
+		Templates: &promptui.SelectTemplates{
+			Active:   "▶ {{ . | cyan }}",
+			Inactive: "  {{ . }}",
+			Selected: "✔ {{ . | green }}",
+		},
+	}
+
+	index, _, err := prompt.Run()
+	if err != nil {
+		return 0, fmt.Errorf("selection cancelled or failed: %w", err)
+	}
+
+	return index, nil
 }
 
 func selectManga(mangaName *string) (string, error) {

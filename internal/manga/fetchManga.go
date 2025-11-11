@@ -142,13 +142,13 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 	return chapterList, nil
 }
 
-func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *string) error {
-	chapterImageIDs, hash, err := retrieveMangaImagesIDs(chapterID)
+func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *string, filePathDirectory string) error {
+	chapterImageIDs, hash, err := retrieveMangaChapterImagesIDs(chapterID)
 	if err != nil {
 		return err
 	}
 
-	dir := filepath.Join("resources", "downloads", ""+*mangaName, "chapter-"+*chapterNumber)
+	dir := filepath.Join("resources", filePathDirectory, ""+*mangaName, "chapter-"+*chapterNumber)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create directory: %v", err)
 	}
@@ -168,7 +168,7 @@ func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *s
 	return nil
 }
 
-func retrieveMangaImagesIDs(chapterID *string) ([]string, string, error) { // https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
+func retrieveMangaChapterImagesIDs(chapterID *string) ([]string, string, error) { // https://api.mangadex.org/docs/04-chapter/retrieving-chapter/
 	baseURL := "https://api.mangadex.org/at-home/server/" + *chapterID
 	// params := url.Values{}
 
