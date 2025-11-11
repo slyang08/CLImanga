@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-var (
+const (
 	baseURL     string = "https://api.mangadex.org"
 	downloadURL string = "https://uploads.mangadex.org"
 )
@@ -142,13 +142,13 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 	return chapterList, nil
 }
 
-func DownloadMangaChapter(chapterID *string) error {
+func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *string) error {
 	chapterImageIDs, hash, err := retrieveMangaImagesIDs(chapterID)
 	if err != nil {
 		return err
 	}
 
-	dir := filepath.Join("resources", "downloads", "chapter-"+*chapterID)
+	dir := filepath.Join("resources", "downloads", ""+*mangaName, "chapter-"+*chapterNumber)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create directory: %v", err)
 	}

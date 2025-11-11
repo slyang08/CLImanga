@@ -37,7 +37,7 @@ func main() {
 			fmt.Println(err)
 		}
 
-		manga.DownloadMangaChapter(&selectedChapter.ID)
+		manga.DownloadMangaChapter(&selectedChapter.ID, &mangaName, &selectedChapter.ChapterNumber)
 	}
 }
 
