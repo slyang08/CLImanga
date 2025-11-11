@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/manifoldco/promptui"
 	"github.com/scinac/CLImanga/internal/manga"
+	"github.com/scinac/CLImanga/internal/ui"
 )
 
 const (
@@ -27,8 +27,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	if len(os.Args) < 2 {
-		fmt.Println("Do you want to download a Manga or only read one?")
-		appMode, err := selectAppMode()
+		appMode, err := ui.SelectAppMode()
 		if err != nil {
 			fmt.Print(err.Error())
 			return
@@ -41,7 +40,7 @@ func main() {
 			return
 		}
 
-		mangaID, err := selectManga(&mangaName)
+		mangaID, err := ui.SelectManga(&mangaName)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -55,7 +54,7 @@ func main() {
 }
 
 func readMangaMode(mangaID *string, mangaName *string) {
-	selectedChapter, errSelect := selectChapterFromManga(mangaID)
+	selectedChapter, errSelect := ui.SelectChapterFromManga(mangaID)
 	if errSelect != nil {
 		fmt.Println(errSelect)
 	}
@@ -64,87 +63,6 @@ func readMangaMode(mangaID *string, mangaName *string) {
 	if errDownload != nil {
 		fmt.Print(errDownload.Error())
 	}
-}
-
-func selectAppMode() (int, error) {
-	prompt := promptui.Select{
-		Label: "Choose an action",
-		Items: []string{"Download Manga", "Read Manga"},
-		Templates: &promptui.SelectTemplates{
-			Active:   "▶ {{ . | cyan }}",
-			Inactive: "  {{ . }}",
-			Selected: "✔ {{ . | green }}",
-		},
-	}
-
-	index, _, err := prompt.Run()
-	if err != nil {
-		return 0, fmt.Errorf("selection cancelled or failed: %w", err)
-	}
-
-	return index, nil
-}
-
-func selectManga(mangaName *string) (string, error) {
-	fmt.Println("Searching mangas with Name:", *mangaName)
-
-	mangasFound, err := manga.FetchMangasByNameSearch(mangaName)
-	if err != nil {
-		return "", fmt.Errorf(err.Error())
-	}
-
-	if len(mangasFound) == 0 {
-		return "", fmt.Errorf("Sorry no mangas found with that name")
-	}
-
-	prompt := promptui.Select{
-		Label: "Select a Manga",
-		Items: mangasFound,
-		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "▶ {{ .Name | cyan }}",
-			Inactive: "  {{ .Name }}",
-			Selected: "✔ {{ .Name | green }}",
-		},
-		Size: 10,
-	}
-
-	i, _, err := prompt.Run()
-	if err != nil {
-		return "", fmt.Errorf("selection cancelled or failed: %w", err)
-	}
-
-	selectedManga := mangasFound[i]
-	return selectedManga.ID, nil
-}
-
-func selectChapterFromManga(mangaID *string) (*manga.ChapterSelect, error) {
-	fmt.Println("Select a Chapter from the list...")
-
-	chapterList, err := manga.GetAllChapterListOfManga(mangaID)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	prompt := promptui.Select{
-		Label: "Select a Chapter",
-		Items: chapterList,
-		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "▶ Chapter {{ .ChapterNumber }}: {{ .Title | cyan }}",
-			Inactive: "  Chapter {{ .ChapterNumber }}: {{ .Title }}",
-			Selected: "✔ Chapter {{ .ChapterNumber }}: {{ .Title | green }}",
-		},
-		Size: 10,
-	}
-
-	i, _, err := prompt.Run()
-	if err != nil {
-		return nil, fmt.Errorf("chapter selection cancelled or failed: %w", err)
-	}
-
-	selectedChapter := chapterList[i]
-	return &selectedChapter, nil
 }
 
 func checkForDependencies() bool {
