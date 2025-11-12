@@ -59,10 +59,19 @@ func readMangaMode(mangaID *string, mangaName *string) {
 		fmt.Println(errSelect)
 	}
 
-	errDownload := manga.DownloadMangaChapter(&selectedChapter.ID, mangaName, &selectedChapter.ChapterNumber, DRECTORY_CACHE)
-	if errDownload != nil {
-		fmt.Print(errDownload.Error())
-	}
+	readChapter(mangaName, selectedChapter)
+}
+
+func readChapter(mangaName *string, selectedChapter *manga.ChapterSelect) {
+	manga.DownloadMangaChapter(&selectedChapter.ID, mangaName, &selectedChapter.ChapterNumber, DRECTORY_CACHE)
+
+	appInstance, appWindow := ui.InitGUIApp(*mangaName, 900, 900)
+
+	wd, _ := os.Getwd()
+	var folder string = wd + "/resources/cache/" + *mangaName + "/chapter-" + selectedChapter.ChapterNumber
+
+	ui.DisplayChapter(appWindow, folder)
+	appInstance.Run()
 }
 
 func checkForDependencies() bool {
