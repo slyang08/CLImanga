@@ -8,9 +8,10 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"github.com/scinac/CLImanga/internal/manga"
 )
 
-func InitGUIApp(title string, width, height float32) (fyne.App, fyne.Window) {
+func InitGUIApp(title string, chapterList *[]manga.ChapterSelect, width, height float32) (fyne.App, fyne.Window) {
 	appGui := app.New()
 	window := appGui.NewWindow(title)
 	window.Resize(fyne.NewSize(width, height))

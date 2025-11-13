@@ -26,7 +26,7 @@ func SelectAppMode() (int, error) {
 	return index, nil
 }
 
-func SelectChapterFromManga(mangaID *string) (*manga.ChapterSelect, error) {
+func SelectChapterFromManga(mangaID *string) (*manga.ChapterSelect, *[]manga.ChapterSelect, error) {
 	fmt.Println("Select a Chapter from the list...")
 
 	chapterList, err := manga.GetAllChapterListOfManga(mangaID)
@@ -48,11 +48,11 @@ func SelectChapterFromManga(mangaID *string) (*manga.ChapterSelect, error) {
 
 	i, _, err := prompt.Run()
 	if err != nil {
-		return nil, fmt.Errorf("chapter selection cancelled or failed: %w", err)
+		return nil, nil, fmt.Errorf("chapter selection cancelled or failed: %w", err)
 	}
 
 	selectedChapter := chapterList[i]
-	return &selectedChapter, nil
+	return &selectedChapter, &chapterList, nil
 }
 
 func SelectManga(mangaName *string) (string, error) {

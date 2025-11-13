@@ -3,6 +3,7 @@ module github.com/scinac/CLImanga
 go 1.25.3
 
 require (
+	fyne.io/fyne v1.4.3
 	fyne.io/fyne/v2 v2.7.0
 	github.com/manifoldco/promptui v0.9.0
 )

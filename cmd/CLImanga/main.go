@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"fyne.io/fyne/v2"
 	"github.com/scinac/CLImanga/internal/manga"
 	"github.com/scinac/CLImanga/internal/ui"
 )
@@ -55,22 +56,22 @@ func main() {
 }
 
 func readMangaMode(mangaID *string, mangaName *string) {
-	selectedChapter, errSelect := ui.SelectChapterFromManga(mangaID)
+	selectedChapter, chapterList, errSelect := ui.SelectChapterFromManga(mangaID)
 	if errSelect != nil {
 		fmt.Println(errSelect)
 	}
 
-	readChapter(mangaName, selectedChapter)
+	appInstance, appWindow := ui.InitGUIApp(*mangaName, chapterList, 900, 900)
+
+	readChapter(mangaName, selectedChapter, appInstance, appWindow)
 }
 
 func downloadMangaMode(mangaID *string, mangaName *string) {
 	manga.DownloadEntireManga(mangaID, mangaName)
 }
 
-func readChapter(mangaName *string, selectedChapter *manga.ChapterSelect) {
+func readChapter(mangaName *string, selectedChapter *manga.ChapterSelect, appInstance fyne.App, appWindow fyne.Window) {
 	manga.DownloadMangaChapter(&selectedChapter.ID, mangaName, &selectedChapter.ChapterNumber, DRECTORY_CACHE)
-
-	appInstance, appWindow := ui.InitGUIApp(*mangaName, 900, 900)
 
 	wd, _ := os.Getwd()
 	var folder string = wd + "/resources/cache/" + *mangaName + "/chapter-" + selectedChapter.ChapterNumber
