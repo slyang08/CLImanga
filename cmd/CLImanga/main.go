@@ -47,6 +47,7 @@ func main() {
 
 		switch appMode {
 		case APPMODE_DOWNLOAD:
+			downloadMangaMode(&mangaID, &mangaName)
 		case APPMODE_READ:
 			readMangaMode(&mangaID, &mangaName)
 		}
@@ -60,6 +61,10 @@ func readMangaMode(mangaID *string, mangaName *string) {
 	}
 
 	readChapter(mangaName, selectedChapter)
+}
+
+func downloadMangaMode(mangaID *string, mangaName *string) {
+	manga.DownloadEntireManga(mangaID, mangaName)
 }
 
 func readChapter(mangaName *string, selectedChapter *manga.ChapterSelect) {
