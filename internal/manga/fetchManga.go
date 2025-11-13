@@ -88,6 +88,20 @@ func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 	return mangasFound, nil
 }
 
+func DownloadEntireManga(mangaID *string, mangaName *string) error {
+	chapterList, err := GetAllChapterListOfManga(mangaID)
+	if err != nil {
+		return err
+	}
+
+	for _, chapter := range chapterList {
+		DownloadMangaChapter(&chapter.ID, mangaName, &chapter.ChapterNumber, "downloads")
+		log.Println("Chapter-" + chapter.ChapterNumber + " downloaded.")
+	}
+
+	return nil
+}
+
 func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // https://api.mangadex.org/docs/04-chapter/search/
 	APIURL := baseURL + "/manga/" + *mangaID + "/feed"
 	params := url.Values{}
@@ -162,7 +176,7 @@ func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *s
 			continue
 		}
 
-		log.Printf("Saved page %d: %s", i+1, savePath)
+		// log.Printf("Saved page %d: %s", i+1, savePath)
 	}
 
 	return nil
