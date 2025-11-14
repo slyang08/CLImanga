@@ -28,7 +28,6 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 		manga.DownloadMangaChapter(&(chapterInfo.ID), &mangaName, &chapterInfo.ChapterNumber, "cache") // TODO add multithreading go
 		folder += "/resources/cache/" + mangaName + "/chapter-" + chapterInfo.ChapterNumber
 	}
-	log.Println(folder)
 
 	files, err := filepath.Glob(folder + "/*.jpg")
 	if err != nil {
@@ -47,11 +46,12 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 	}
 
 	nextBtn := widget.NewButton("Next Chapter", func() {
-		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index+1], chapterList)
+		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index+2], chapterList) //  for some reason you have to add 2 for next chapter
 	})
 
 	prevBtn := widget.NewButton("Previous Chapter", func() {
-		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index-1], chapterList)
+		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index-
+			2], chapterList)
 	})
 
 	scroll := container.NewVScroll(container.NewVBox(images...))
