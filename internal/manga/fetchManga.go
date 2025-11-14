@@ -122,7 +122,7 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 
 	chapterList := []ChapterSelect{}
 
-	for _, item := range dataArr { // path: data(id)(attributes)
+	for index, item := range dataArr { // path: data(id)(attributes)
 		itemMap, ok := item.(map[string]any)
 		if !ok {
 			continue
@@ -146,6 +146,7 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 		chapterNumber := attributes["chapter"].(string)
 
 		chapterList = append(chapterList, ChapterSelect{
+			Index:         index,
 			ID:            chapterID,
 			ChapterNumber: chapterNumber,
 			Title:         title,

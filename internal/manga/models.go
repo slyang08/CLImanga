@@ -6,6 +6,7 @@ type MangaSelect struct {
 }
 
 type ChapterSelect struct {
+	Index         int
 	ID            string
 	ChapterNumber string
 	Title         string
