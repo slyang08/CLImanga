@@ -37,7 +37,7 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 			2], chapterList)
 	})
 
-	content := container.NewBorder(prevBtn, nextBtn, nil, nil, nil, nil, scroll)
+	content := container.NewBorder(prevBtn, nextBtn, nil, nil, scroll)
 	w.SetContent(content)
 	w.Show()
 

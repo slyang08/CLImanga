@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 const (
@@ -94,9 +95,27 @@ func DownloadEntireManga(mangaID *string, mangaName *string) error {
 		return err
 	}
 
+	var wg sync.WaitGroup
+
+	maxConcurrent := 5                        // max threads running
+	sem := make(chan struct{}, maxConcurrent) // sephamore
+
 	for _, chapter := range chapterList {
-		DownloadMangaChapter(&chapter.ID, mangaName, &chapter.ChapterNumber, "downloads")
-		log.Println("Chapter-" + chapter.ChapterNumber + " downloaded.")
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(chapter ChapterSelect) {
+			defer wg.Done()
+			defer func() { <-sem }() // release sephamore slot
+			err := DownloadMangaChapter(&chapter.ID, mangaName, &chapter.ChapterNumber, "downloads", nil)
+			if err != nil {
+				log.Println("Chapter-" + chapter.ChapterNumber + " failed to donwload.")
+			} else {
+				log.Println("Chapter-" + chapter.ChapterNumber + " downloaded.")
+			}
+		}(chapter)
+
 	}
 
 	return nil
