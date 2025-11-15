@@ -51,7 +51,7 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 			for file := range ch {
 				fyne.DoAndWait(func() {
 					img := canvas.NewImageFromFile(file)
-					img.FillMode = canvas.ImageFillStretch
+					img.FillMode = canvas.ImageFillContain
 					img.SetMinSize(fyne.NewSize(600, 800))
 					imgContainer.Add(img)
 					imgContainer.Refresh()
