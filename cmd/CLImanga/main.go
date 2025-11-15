@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	APPMODE_DOWNLOAD   = 0
-	APPMODE_READ       = 1
+	APPMODE_DOWNLOAD   = 1
+	APPMODE_READ       = 0
 	DIRECTORY_DOWNLOAD = "downloads"
 	DRECTORY_CACHE     = "cache"
 )

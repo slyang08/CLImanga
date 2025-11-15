@@ -29,7 +29,7 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 	scroll.SetMinSize(fyne.NewSize(600, 800))
 
 	nextBtn := widget.NewButton("Next Chapter", func() {
-		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index+2], chapterList) //  for some reason you have to add 2 for next chapter
+		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index+1], chapterList)
 	})
 
 	prevBtn := widget.NewButton("Previous Chapter", func() {
@@ -49,11 +49,13 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 
 		go func() {
 			for file := range ch {
-				img := canvas.NewImageFromFile(file)
-				img.FillMode = canvas.ImageFillStretch
-				img.SetMinSize(fyne.NewSize(600, 800))
-				imgContainer.Add(img)
-				imgContainer.Refresh()
+				fyne.DoAndWait(func() {
+					img := canvas.NewImageFromFile(file)
+					img.FillMode = canvas.ImageFillStretch
+					img.SetMinSize(fyne.NewSize(600, 800))
+					imgContainer.Add(img)
+					imgContainer.Refresh()
+				})
 			}
 		}()
 	} else if mode == 'd' { // download mode

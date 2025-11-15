@@ -10,7 +10,7 @@ import (
 func SelectAppMode() (int, error) {
 	prompt := promptui.Select{
 		Label: "Choose an action",
-		Items: []string{"Download Manga", "Read Manga"},
+		Items: []string{"Read Manga", "Download Manga"},
 		Templates: &promptui.SelectTemplates{
 			Active:   "▶ {{ . | cyan }}",
 			Inactive: "  {{ . }}",
