@@ -24,26 +24,9 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 	wd, _ := os.Getwd()
 	var folder string = wd
 
-	if mode == 'r' { // if in read mode (download mode wont need to download again)
-		manga.DownloadMangaChapter(&(chapterInfo.ID), &mangaName, &chapterInfo.ChapterNumber, "cache") // TODO add multithreading go
-		folder += "/resources/cache/" + mangaName + "/chapter-" + chapterInfo.ChapterNumber
-	}
-
-	files, err := filepath.Glob(folder + "/*.jpg")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(files) == 0 {
-		log.Fatal("No images found in folder")
-	}
-
-	var images []fyne.CanvasObject
-	for _, f := range files {
-		img := canvas.NewImageFromFile(f)
-		img.FillMode = canvas.ImageFillStretch
-		img.SetMinSize(fyne.NewSize(600, 800))
-		images = append(images, img)
-	}
+	imgContainer := container.NewVBox()
+	scroll := container.NewVScroll(imgContainer)
+	scroll.SetMinSize(fyne.NewSize(600, 800))
 
 	nextBtn := widget.NewButton("Next Chapter", func() {
 		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index+2], chapterList) //  for some reason you have to add 2 for next chapter
@@ -54,11 +37,32 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 			2], chapterList)
 	})
 
-	scroll := container.NewVScroll(container.NewVBox(images...))
-	scroll.SetMinSize(fyne.NewSize(600, 800))
-
-	content := container.NewBorder(prevBtn, nextBtn, nil, nil, scroll)
-
+	content := container.NewBorder(prevBtn, nextBtn, nil, nil, nil, nil, scroll)
 	w.SetContent(content)
 	w.Show()
+
+	if mode == 'r' { // if in read mode (download mode wont need to download again)
+		ch := make(chan string)
+
+		go manga.DownloadMangaChapter(&(chapterInfo.ID), &mangaName, &chapterInfo.ChapterNumber, "cache", ch) // TODO add multithreading go
+		folder += "/resources/cache/" + mangaName + "/chapter-" + chapterInfo.ChapterNumber
+
+		go func() {
+			for file := range ch {
+				img := canvas.NewImageFromFile(file)
+				img.FillMode = canvas.ImageFillStretch
+				img.SetMinSize(fyne.NewSize(600, 800))
+				imgContainer.Add(img)
+				imgContainer.Refresh()
+			}
+		}()
+	} else if mode == 'd' { // download mode
+		files, err := filepath.Glob(folder + "/*.jpg")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(files) == 0 {
+			log.Fatal("No images found in folder")
+		}
+	}
 }

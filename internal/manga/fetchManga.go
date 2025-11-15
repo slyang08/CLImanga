@@ -157,7 +157,7 @@ func GetAllChapterListOfManga(mangaID *string) ([]ChapterSelect, error) { // htt
 	return chapterList, nil
 }
 
-func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *string, filePathDirectory string) error {
+func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *string, filePathDirectory string, out chan<- string) error {
 	chapterImageIDs, hash, err := retrieveMangaChapterImagesIDs(chapterID)
 	if err != nil {
 		return err
@@ -178,8 +178,11 @@ func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *s
 		}
 
 		// log.Printf("Saved page %d: %s", i+1, savePath)
+
+		out <- savePath
 	}
 
+	close(out)
 	return nil
 }
 
