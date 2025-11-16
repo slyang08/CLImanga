@@ -1,31 +1,24 @@
 # 📚 CLImanga
 
 ```text
-███████╗██╗     ██╗███╗   ███╗ █████╗ ███╗   ██╗ ██████╗  █████╗
+ ██████╗██╗     ██╗███╗   ███╗ █████╗ ███╗   ██╗ ██████╗  █████╗ 
 ██╔════╝██║     ██║████╗ ████║██╔══██╗████╗  ██║██╔════╝ ██╔══██╗
-█████╗  ██║     ██║██╔████╔██║███████║██╔██╗ ██║██║  ███╗███████║
-██╔══╝  ██║     ██║██║╚██╔╝██║██╔══██║██║╚██╗██║██║   ██║██╔══██║
-██║     ███████╗██║██║ ╚═╝ ██║██║  ██║██║ ╚████║╚██████╔╝██║  ██║
-╚═╝     ╚══════╝╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝
+██║     ██║     ██║██╔████╔██║███████║██╔██╗ ██║██║  ███╗███████║
+██║     ██║     ██║██║╚██╔╝██║██╔══██║██║╚██╗██║██║   ██║██╔══██║
+╚██████╗███████╗██║██║ ╚═╝ ██║██║  ██║██║ ╚████║╚██████╔╝██║  ██║
+ ╚═════╝╚══════╝╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝
 CLI Manga Reader & Downloader powered by Go + MangaDex API
 ```
 
 <p align="center"> <a href="https://github.com/scinac/CLImanga/stargazers"><img src="https://img.shields.io/github/stars/scinac/CLImanga?style=for-the-badge" /></a> <a href="https://github.com/scinac/CLImanga/issues"><img src="https://img.shields.io/github/issues/scinac/CLImanga?style=for-the-badge" /></a> <a href="https://github.com/scinac/CLImanga/network/members"><img src="https://img.shields.io/github/forks/scinac/CLImanga?style=for-the-badge" /></a>  </p> <p align="center"><b>A fast & lightweight terminal manga reader and downloader with MangaDex API support. Built in Go.</b></p>
 
-## Acknowledgements
+## Features
 
-About the Project
-CLImanga is a command-line Manga Reader & Downloader written in Go.
-It searches manga using the MangaDex API, allows you to select a manga, browse chapters, download them, and even read in a GUI viewer powered by Fyne.
-This project is still a Work in Progress, but already supports:
-<br>✔ Manga search
+✔ Manga search
 <br>✔ Chapter list display
 <br>✔ Safe & fast image-based chapter download (.jpg)
 <br>✔ GUI reading mode with scrollable viewer
 <br>✔ Multi-threaded download system (up to 5 concurrent threads)
-
-✨ Features
-FeatureStatusSearch manga via MangaDex API<br>✔Select & download chapters<br>✔Built-in GUI chapter reader<br>✔Cache system (no re-downloading for reading)<br>✔Full manga download🚧 PartialMulti-threaded downloads<br>✔CLI interactive menus (PromptUI)<br>✔Future: EPUB/PDF export🕒 Planned
 
 ## Built With
 
@@ -38,7 +31,8 @@ FeatureStatusSearch manga via MangaDex API<br>✔Select & download chapters<br>�
 
 ### Clone the repo
 
-git clone https://github.com/scinac/CLImanga
+git clone <https://github.com/scinac/CLImanga>
+
 cd CLImanga
 
 ### Build the app
@@ -52,15 +46,6 @@ go build -o climanga
 🕹 Usage
 If no command arguments are given, you will be prompted:
 Welcome to CLImanga!
-
-Choose an action:
-▶ Read Manga
-Download Manga
-Search Manga: One Piece
-Select a Manga:
-▶ One Piece
-Onepunch-Man
-...
 
 ## 🤝 Contributing
 
@@ -86,7 +71,7 @@ Open a Pull Request
 ## 🧾 Credits
 
 Huge thanks to MangaDex for providing a public API.
-Libraries used:
+Libraries used:\n
 github.com/manifoldco/promptui
 fyne.io/fyne/v2
 
@@ -94,15 +79,13 @@ fyne.io/fyne/v2
 
 Resources that helped during development:
 
-https://api.mangadex.org
+<https://api.mangadex.org>
 
-https://promptui.com
+<https://promptui.com>
 
-https://fyne.io
+<https://fyne.io>
 
-https://golang.org
-
-https://shields.io
+<https://golang.org>
 
 ⭐ If you like this project, consider giving it a star!
 
