@@ -23,16 +23,19 @@ func InitGUIApp(title string, width float32, height float32) (fyne.App, fyne.Win
 func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *manga.ChapterSelect, chapterList *[]manga.ChapterSelect) {
 	wd, _ := os.Getwd()
 	var folder string = wd
+	folder += "/resources/cache/" + mangaName + "/chapter-" + chapterInfo.ChapterNumber
 
 	imgContainer := container.NewVBox()
 	scroll := container.NewVScroll(imgContainer)
 	scroll.SetMinSize(fyne.NewSize(600, 800))
 
 	nextBtn := widget.NewButton("Next Chapter", func() {
+		deleteAllCurrentChaptersInCache(folder) // return value error maybe check with log system
 		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index+1], chapterList)
 	})
 
 	prevBtn := widget.NewButton("Previous Chapter", func() {
+		deleteAllCurrentChaptersInCache(folder)
 		DisplayChapter(w, mode, mangaName, &(*chapterList)[chapterInfo.Index-
 			2], chapterList)
 	})
@@ -45,7 +48,6 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 		ch := make(chan string)
 
 		go manga.DownloadMangaChapter(&(chapterInfo.ID), &mangaName, &chapterInfo.ChapterNumber, "cache", ch) // TODO add multithreading go
-		folder += "/resources/cache/" + mangaName + "/chapter-" + chapterInfo.ChapterNumber
 
 		go func() {
 			for file := range ch {
@@ -67,4 +69,13 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 			log.Fatal("No images found in folder")
 		}
 	}
+}
+
+func deleteAllCurrentChaptersInCache(path string) error {
+	err := os.RemoveAll(path)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
