@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"fyne.io/fyne/v2"
 	"github.com/scinac/CLImanga/internal/manga"
@@ -18,6 +20,7 @@ const (
 )
 
 func main() {
+	catchProgramExit()
 	fmt.Println("Welcome to CLImanga!")
 	fmt.Println("Checking Dependecies... ")
 	if !checkForDependencies() {
@@ -78,4 +81,39 @@ func readChapter(mangaName *string, selectedChapter *manga.ChapterSelect, chapte
 
 func checkForDependencies() bool {
 	return true
+}
+
+func catchProgramExit() {
+	sigs := make(chan os.Signal, 1)
+
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM) // Catch Ctrl+C and SIGTERM
+
+	go func() {
+		<-sigs
+		fmt.Println("\nGracefully shutting down...")
+		cleanupProgram()
+		os.Exit(0)
+	}()
+}
+
+func cleanupProgram() {
+	deleteAllCacheFiles()
+}
+
+func deleteAllCacheFiles() error {
+	wd, _ := os.Getwd()
+	var path string = wd + "/resources/cache"
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		err := os.RemoveAll(path + "/" + file.Name())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
