@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	logger "github.com/scinac/CLImanga/internal/log"
 	"github.com/scinac/CLImanga/internal/manga"
 )
 
@@ -47,6 +48,7 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 	if mode == 'r' { // if in read mode (download mode wont need to download again)
 		ch := make(chan string)
 
+		logger.Info.Printf("Starting goroutine to download manga: %s, chapter %s", mangaName, chapterInfo.ChapterNumber)
 		go manga.DownloadMangaChapter(&(chapterInfo.ID), &mangaName, &chapterInfo.ChapterNumber, "cache", ch) // TODO add multithreading go
 
 		go func() {
@@ -64,9 +66,12 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 		files, err := filepath.Glob(folder + "/*.jpg")
 		if err != nil {
 			log.Fatal(err)
+			logger.Error.Printf("Failed to find images in folder: %v", err)
 		}
 		if len(files) == 0 {
 			log.Fatal("No images found in folder")
+			logger.Error.Printf("No images found in folder for manga %s, chapter %s",
+				mangaName, chapterInfo.ChapterNumber)
 		}
 	}
 }

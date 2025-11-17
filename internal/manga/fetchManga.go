@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	logger "github.com/scinac/CLImanga/internal/log"
 )
 
 const (
@@ -111,6 +113,7 @@ func DownloadEntireManga(mangaID *string, mangaName *string) error {
 			err := DownloadMangaChapter(&chapter.ID, mangaName, &chapter.ChapterNumber, "downloads", nil)
 			if err != nil {
 				log.Println("Chapter-" + chapter.ChapterNumber + " failed to donwload.")
+				logger.Error.Printf("Chapter-%s download failed: %v", chapter.ChapterNumber, err)
 			} else {
 				log.Println("Chapter-" + chapter.ChapterNumber + " downloaded.")
 			}
@@ -191,9 +194,12 @@ func DownloadMangaChapter(chapterID *string, mangaName *string, chapterNumber *s
 		imageURL := fmt.Sprintf("%s/data-saver/%s/%s", downloadURL, hash, filename)
 		savePath := filepath.Join(dir, fmt.Sprintf("page_%03d%s", i+1, filepath.Ext(filename)))
 
+		logger.Info.Printf("Downloading image URL: %s", imageURL)
 		if err := downloadFile(imageURL, savePath); err != nil {
 			log.Printf("Failed to download %s: %v", imageURL, err)
-			continue
+			logger.Error.Printf("Failed to download %s: %v", imageURL, err)
+		} else {
+			logger.Info.Printf("Downloaded and saved to %s", savePath)
 		}
 
 		// log.Printf("Saved page %d: %s", i+1, savePath)
