@@ -12,3 +12,8 @@ type ChapterSelect struct {
 	Title         string
 	Pages         float64
 }
+type HistorySave struct {
+	ChapterID    string
+	MangaName    string
+	ChapterNuber string
+}
