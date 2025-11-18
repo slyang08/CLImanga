@@ -85,6 +85,13 @@ func FetchMangasByNameSearch(mangaName *string) ([]MangaSelect, error) {
 					ID:   mangaID,
 					Name: en,
 				})
+			} else {
+				if jp, ok := title["jp"].(string); ok {
+					mangasFound = append(mangasFound, MangaSelect{
+						ID:   mangaID,
+						Name: jp,
+					})
+				}
 			}
 		}
 	}
