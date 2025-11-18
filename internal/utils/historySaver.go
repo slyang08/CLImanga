@@ -7,7 +7,7 @@ import (
 	"github.com/scinac/CLImanga/internal/manga"
 )
 
-func saveEntryToFIle(filePath string, entry manga.HistorySave) error {
+func SaveEntryToFile(filePath string, entry manga.HistorySave) error {
 	var entries []manga.HistorySave
 
 	if _, err := os.Stat(filePath); err == nil {

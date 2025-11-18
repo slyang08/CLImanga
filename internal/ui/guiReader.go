@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/scinac/CLImanga/internal/manga"
+	"github.com/scinac/CLImanga/internal/utils"
 )
 
 func InitGUIApp(title string, width float32, height float32) (fyne.App, fyne.Window) {
@@ -24,6 +26,9 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 	wd, _ := os.Getwd()
 	var folder string = wd
 	folder += "/resources/cache/" + mangaName + "/chapter-" + chapterInfo.ChapterNumber
+
+	var saveFile string = wd
+	saveFile += "/resources/history/history.json"
 
 	imgContainer := container.NewVBox()
 	scroll := container.NewVScroll(imgContainer)
@@ -48,6 +53,17 @@ func DisplayChapter(w fyne.Window, mode rune, mangaName string, chapterInfo *man
 		ch := make(chan string)
 
 		go manga.DownloadMangaChapter(&(chapterInfo.ID), &mangaName, &chapterInfo.ChapterNumber, "cache", ch) // TODO add multithreading go
+
+		newentry := manga.HistorySave{
+			ChapterID:    chapterInfo.ID,
+			MangaName:    mangaName,
+			ChapterNuber: chapterInfo.ChapterNumber,
+		}
+
+		err := utils.SaveEntryToFile(saveFile, newentry)
+		if err != nil {
+			fmt.Println("Error saving history:", err)
+		}
 
 		go func() {
 			for file := range ch {
